@@ -12,6 +12,8 @@ import re
 import string
 import random
 
+random.seed(42)
+
 beamwidth = int(sys.argv[1])
 
 baselist = []
@@ -23,6 +25,7 @@ if beamwidth == 0:
     random.shuffle(baselist)
     for n in range(len(baselist)):
         for m in range(n,len(baselist)):
+            #for m in range(len(baselist)):
             sys.stdout.write(baselist[n]+" "+baselist[m]+"\n")
 else:
     for n in range(len(baselist)):

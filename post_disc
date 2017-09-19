@@ -39,7 +39,7 @@ fi
 echo "Post-processing experiment $EXPDIR"
 
 echo "Generating master match file: $EXPDIR/matches/master_match"
-cat $EXPDIR/matches/out.* | cut -d ' ' -f1-6 | awk 'NF == 2 || ($6 < rhothr && $5 > dtwthr && $2-$1 > durthr && $4-$3 > durthr) {print $0;}' dtwthr=$DTWTHR durthr=$DURTHR rhothr=$RHOTHR | uniq | awk 'NF == 2 {lastpair=$0; lastNF=2; next;}  lastNF==2 {print lastpair; print $0; lastNF=6; next} {print $0; lastNF=6;}' > $EXPDIR/matches/master_match
+#cat $EXPDIR/matches/out.* | cut -d ' ' -f1-6 | awk 'NF == 2 || ($6 < rhothr && $5 > dtwthr && $2-$1 > durthr && $4-$3 > durthr) {print $0;}' dtwthr=$DTWTHR durthr=$DURTHR rhothr=$RHOTHR | uniq | awk 'NF == 2 {lastpair=$0; lastNF=2; next;}  lastNF==2 {print lastpair; print $0; lastNF=6; next} {print $0; lastNF=6;}' > $EXPDIR/matches/master_match
 
 echo "Building adjacency graph"
 python scripts/build_graph.py --input=$EXPDIR/matches/master_match --probthr=$DTWTHR --olapthr=$OLAPTHR --output=$EXPDIR/matches/master_graph --list=$EXPDIR/files.base
@@ -58,3 +58,16 @@ echo "Write the bags-of-pseudoterms feature file"
 python scripts/dump_pseudoterm.py --cinput=$EXPDIR/matches/master_graph.dedups --ninput=$EXPDIR/matches/master_graph.nodes --output=$EXPDIR/matches/master_graph.feats --listname=$EXPDIR/files.base
 
 cp $EXPDIR/matches/master_graph.dedups $EXPDIR/matches/master_graph.nodes $EXPDIR/matches/master_graph.feats $EXPDIR/results/
+
+### ADDED ###
+
+L=$3
+
+DATA=/disk/scratch/s1680167/zero/data
+ALIGN=$DATA/gp_alignments
+
+echo -e "\nMapping nodes to alignments."
+python ~/zero/code/utd/map_utd_output.py $ALIGN/$L/train.ctm.dict $EXPDIR
+
+echo -e "\nGetting pairs and pair statistics."
+python ~/zero/code/utd/extract_pairs.py $EXPDIR

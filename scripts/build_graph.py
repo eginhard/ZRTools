@@ -32,6 +32,8 @@ filelist = options.filelist
 
 vout = open(outFilebase + ".nodes","w")
 eout = open(outFilebase + ".edges","w")
+# Only discovered edges.
+dout = open(outFilebase + ".dedges","w")
 
 print "Building the file set"
 if len(filelist) == 0:
@@ -89,6 +91,7 @@ for line in open(inFilename):
 
     ecount = ecount + 1
     eout.write(str(vcount-1)+"\t"+str(vcount)+"\t"+str(int(float(prob)*1000))+"\n")
+    dout.write(str(vcount-1)+"\t"+str(vcount)+"\t"+str(int(float(prob)*1000))+"\n")
 
     cnt += 1
     if cnt % 100000 == 0:
@@ -129,3 +132,4 @@ print "Total Edges: ", ecount
 
 vout.close()
 eout.close()
+dout.close()

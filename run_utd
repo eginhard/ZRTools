@@ -1,0 +1,60 @@
+#!/bin/bash
+
+DATA=/disk/scratch/s1680167/zero/data
+ALIGN=$DATA/gp_alignments
+
+KALDI_GP=/disk/scratch/s1680167/zero/kaldi_global_phone
+
+L=$1  # language, e.g. SP
+N_JOBS=$2  # number of parallel jobs
+SUFFIX=$3  # e.g. _cae
+
+NAME=gp-$L$SUFFIX
+FILELIST=scripts/$NAME.lst
+
+# Load the configuration file
+. config
+
+echo "Creating wav file list."
+if [ ! -f no_transcript.$L ]; then
+    touch no_transcript.$L
+fi
+cut -d " " -f 2 $KALDI_GP/data/$L/train/wav.scp | grep -vFf no_transcript.$L > $FILELIST
+#cut -d " " -f 2 $KALDI_GP/data/$L/train/wav.scp | grep "SP02" | grep -vFf no_transcript.$L > $FILELIST
+
+echo "Generating lsh and run_disc commands."
+./run_disc nosge $FILELIST $SUFFIX
+
+grep -oP "$L[^/]*(?=\.wav)" $FILELIST > $EXPDIR/$NAME/utts.lst
+
+echo "Obtaining VAD files from word-level alignments."
+rm -Rdf $EXPDIR/$NAME/vad/
+mkdir -p $EXPDIR/$NAME/vad/
+
+python ~/zero/code/utd/alignment_to_vad.py \
+    $ALIGN/$L/train.ctm $EXPDIR/$NAME/vad/ $EXPDIR/$NAME/train.vad
+
+echo "Creating alignment dictionary."
+python ~/zero/code/utd/create_alignment_dict.py $ALIGN/$L/train.ctm
+
+echo "Extracting LSH signatures."
+sh $EXPDIR/$NAME/lsh.cmd 1> $EXPDIR/$NAME/lshlog/out.1 2> $EXPDIR/$NAME/lshlog/err.1
+
+shuf $EXPDIR/$NAME/disc.cmd > $TMP/disc.cmd
+mv $TMP/disc.cmd $EXPDIR/$NAME/disc.cmd
+
+# Move all same-speaker comparisons to the front.
+python split_disc.py $EXPDIR/$NAME/disc.cmd
+cat $EXPDIR/$NAME/disc.cmd_same > $EXPDIR/$NAME/disc.cmd
+cat $EXPDIR/$NAME/disc.cmd_diff >> $EXPDIR/$NAME/disc.cmd
+
+rm $EXPDIR/$NAME/disc.cmd_*
+
+echo "Starting discovery ($N_JOBS parallel jobs)."
+# Might be necessary to adjust suffix length (e.g. -a 3)
+split -a 3 -d -n l/$N_JOBS $EXPDIR/$NAME/disc.cmd $EXPDIR/$NAME/disc.cmd_
+
+for file in $EXPDIR/$NAME/disc.cmd_*; do
+    n=$(echo $file | rev | cut -d '_' -f 1 | rev)
+    nice sh $file 1> $EXPDIR/$NAME/matches/out.$n 2> /dev/null &
+done

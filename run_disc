@@ -32,12 +32,12 @@ fi
 
 # Make experiment directories
 EXPNAME=`basename $FILELIST .lst`
-if ! [ -z $SUFFIX ]; then
-    EXPNAME=$EXPNAME-$SUFFIX
-fi
+# if ! [ -z $SUFFIX ]; then
+#     EXPNAME=$EXPNAME-$SUFFIX
+# fi
 
 # Load the configuration file
-. config 
+. config
 
 echo "Experiment ID: $EXPNAME"
 
@@ -78,10 +78,10 @@ else
     echo "Extracting LSH signatures"
     mkdir $EXPDIR/lshlog
     rm $EXPDIR/lshlog/*  
-    sh $EXPDIR/lsh.cmd 1> $EXPDIR/lshlog/out.1 2> $EXPDIR/lshlog/err.1
+    #sh $EXPDIR/lsh.cmd 1> $EXPDIR/lshlog/out.1 2> $EXPDIR/lshlog/err.1
 
     echo "Running discovery tasks"
     mkdir $EXPDIR/matches
     rm $EXPDIR/matches/*
-    sh $EXPDIR/disc.cmd 1> $EXPDIR/matches/out.1 2> $EXPDIR/matches/err.1
+    #sh $EXPDIR/disc.cmd 1> $EXPDIR/matches/out.1 2> $EXPDIR/matches/err.1
 fi
