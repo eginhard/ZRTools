@@ -9,6 +9,7 @@
 SGE=$1
 FILELIST=$2
 SUFFIX=$3
+CUSTOM_FEATS=$4
 
 if [ -z "$SGE" ]; then
     echo "USAGE: ./run_disc <sge_or_nosge> <filelist> [ <suffix> ]"
@@ -62,7 +63,7 @@ plebdisc/genproj -D $DIM -S 64 -seed 1 -projfile $EXPDIR/proj_S64xD${DIM}_seed1
 
 # Generate LSH command list
 echo "Generating LSH command list: $EXPDIR/lsh.cmd"
-cat $EXPDIR/files.lst | awk '{print "scripts/generate_plp_lsh",$1,expdir;}' expdir=$EXPDIR > $EXPDIR/lsh.cmd
+cat $EXPDIR/files.lst | awk '{print "scripts/generate_plp_lsh",$1,expdir,feats;}' expdir=$EXPDIR feats=$CUSTOM_FEATS > $EXPDIR/lsh.cmd
 
 # Generate discovery command list
 echo "Generating discovery command list: $EXPDIR/disc.cmd"

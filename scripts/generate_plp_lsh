@@ -14,6 +14,8 @@ LSHOUTDIR=$2/lsh
 SUFFIX=$(echo $2 | rev | cut -d "_" -f 1 | rev)
 EXPNAME=$2
 
+CUSTOM_FEATS=$3
+
 if [ ! -f $SRCFILE ]; then
     echo $SRCFILE does not exist. Exiting.
     exit
@@ -33,8 +35,8 @@ ID=`basename $SRCFILE .$EXT`
 
 RAW_FILE=$TMP/${ID}.raw
 WAV_FILE=$TMP/${ID}.wav
-if [[ $EXPNAME == *"cae"* ]]; then
-    FEAT_BIN=cae_HA2/${ID}.binary
+if [ -d "$CUSTOM_FEATS" ]; then
+    FEAT_BIN=$CUSTOM_FEATS/${ID}.binary
 else
     FEAT_BIN=$TMP/${ID}.binary
 fi
@@ -43,7 +45,7 @@ FEAT_STD=$FEATOUTDIR/${ID}.std.binary
 SIG_FILE=$LSHOUTDIR/${ID}.std.lsh64
     
 # Get audio into a 16-bit 8kHz wav file
-if [[ $EXPNAME != *"cae"* ]]; then
+if [ ! -d "$CUSTOM_FEATS" ]; then
     if [ $EXT == "sph" ]; then 
         $SPH2PIPEBIN -f rif -p $SRCFILE > $WAV_FILE
     elif [ $EXT == "wav" ]; then    
@@ -57,7 +59,7 @@ fi
 #rm $VAD_FILE.tmp
 
 # Generate 39-dim PLP (13 cc's + delta + double-deltas using ICSI's feacalc)
-if [[ $EXPNAME != *"cae"* ]]; then
+if [ ! -d "$CUSTOM_FEATS" ]; then
     $FEACALCBIN -plp 12 -cep 13 -dom cep -deltaorder 2 -dither -frqaxis bark -samplerate 8000 -win 25 -step 10 -ip MSWAVE -rasta false -compress true -op swappedraw -o $FEAT_BIN ${WAV_FILE}
 fi
 
@@ -71,6 +73,6 @@ plebdisc/lsh -D $DIM -S 64 -projfile $2/proj_S64xD${DIM}_seed1 -featfile $FEAT_S
 # Clean-up
 rm -f $WAV_FILE #$VAD_FILE
 
-if [[ $EXPNAME != *"cae"* ]]; then
+if [ ! -d "$CUSTOM_FEATS" ]; then
     rm -f $FEAT_BIN
 fi
