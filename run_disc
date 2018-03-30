@@ -11,6 +11,10 @@ FILELIST=$2
 SUFFIX=$3
 CUSTOM_FEATS=$4
 
+TRIMTHR=${5:-0.25}
+CASTTHR=${6:-7}
+R=${7:-10}
+
 if [ -z "$SGE" ]; then
     echo "USAGE: ./run_disc <sge_or_nosge> <filelist> [ <suffix> ]"
     exit
@@ -67,7 +71,7 @@ cat $EXPDIR/files.lst | awk '{print "scripts/generate_plp_lsh",$1,expdir,feats;}
 
 # Generate discovery command list
 echo "Generating discovery command list: $EXPDIR/disc.cmd"
-cat $EXPDIR/files.base | scripts/beam_pairs.py 0 | awk '{print "scripts/plebdisc_filepair",$1,$2,expdir,dim;}' expdir=$EXPDIR dim=$DIM | awk '{print $1,"\""$2"\"", "\""$3"\"",$4,$5,$6}' > $EXPDIR/disc.cmd
+cat $EXPDIR/files.base | scripts/beam_pairs.py 0 | awk '{print "scripts/plebdisc_filepair",$1,$2,expdir,dim,trimthr,castthr,R;}' expdir=$EXPDIR dim=$DIM trimthr=$TRIMTHR castthr=$CASTTHR R=$R | awk '{print $1,"\""$2"\"", "\""$3"\"",$4,$5,$6,$7,$8,$9}' > $EXPDIR/disc.cmd
 
 if [ "$SGE" == "sge" ]; then 
     # Submit the LSH jobs

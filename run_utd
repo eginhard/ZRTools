@@ -1,15 +1,18 @@
 #!/bin/bash
 
-DATA=/disk/scratch/s1680167/zero/data
-ALIGN=$DATA/gp_alignments
+ALIGN=/group/project/cstr2/enno/zero/data/gp_alignments/
 
-KALDI_GP=/disk/scratch/s1680167/zero/kaldi_global_phone
+KALDI_GP=/group/project/cstr2/enno/zero/kaldi_globalphone
 
 L=$1  # language, e.g. SP
 N_JOBS=$2  # number of parallel jobs
 SUFFIX=$3  # e.g. _cae
 DATASET=$4  # train/dev
 CUSTOM_FEATS=$5
+
+TRIMTHR=${6:-0.25}
+CASTTHR=${7:-7}
+R=${8:-10}
 
 
 NAME=gp-$L$SUFFIX
@@ -26,7 +29,7 @@ cut -d " " -f 2 $KALDI_GP/data/$L/$DATASET/wav.scp | grep -vFf no_transcript.$L 
 #cut -d " " -f 2 $KALDI_GP/data/$L/$DATASET/wav.scp | grep "SP02" | grep -vFf no_transcript.$L > $FILELIST
 
 echo "Generating lsh and run_disc commands."
-./run_disc nosge $FILELIST $SUFFIX $CUSTOM_FEATS
+./run_disc nosge $FILELIST $SUFFIX $CUSTOM_FEATS $TRIMTHR $CASTTHR $R
 
 grep -oP "$L[^/]*(?=\.wav)" $FILELIST > $EXPDIR/$NAME/utts.lst
 

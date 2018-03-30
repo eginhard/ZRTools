@@ -66,13 +66,15 @@ cp $EXPDIR/matches/master_graph.dedups $EXPDIR/matches/master_graph.nodes $EXPDI
 
 ### ADDED ###
 
+echo -e "\nGetting pairs and pair statistics."
+    python ~/zero/code/utd/extract_pairs.py $EXPDIR
+
 L=$3
 
-DATA=/disk/scratch/s1680167/zero/data
-ALIGN=$DATA/gp_alignments
+if [ "$L" != "" ]; then
+    DATA=/group/project/cstr2/enno/zero/data
+    ALIGN=$DATA/gp_alignments
 
-echo -e "\nMapping nodes to alignments."
-python ~/zero/code/utd/map_utd_output.py $ALIGN/$L/train.ctm.dict $EXPDIR
-
-echo -e "\nGetting pairs and pair statistics."
-python ~/zero/code/utd/extract_pairs.py $EXPDIR
+    echo -e "\nMapping nodes to alignments."
+    python ~/zero/code/utd/map_utd_output.py $ALIGN/$L/train.ctm.dict $EXPDIR
+fi

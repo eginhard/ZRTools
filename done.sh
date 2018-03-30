@@ -4,7 +4,12 @@
 
 EXP=$1
 
-done=$(grep "_" $EXP/matches/out.* | wc -l)
+str="_"
+if [[ "$EXP" == *"buckeye"* ]]; then
+    str="s"
+fi
+
+done=$(grep $str $EXP/matches/out.* | wc -l)
 total=$(wc -l $EXP/disc.cmd_* | tail -1 | grep -o -P "[0-9]+")
 
 percent=$(bc -l <<< "scale=4; $done/$total")
